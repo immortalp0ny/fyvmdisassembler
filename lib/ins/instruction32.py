@@ -6,7 +6,7 @@ idaapi.require("lib.ins.operand")
 
 import re
 from lib.helper import u_li32
-from lib.ins import instruction
+from lib.ins.instruction import Instruction
 from lib.ins.operand import InsOperand
 from hexdump import hexdump
 
@@ -52,28 +52,28 @@ def call_parser(instruction_data, opcode_id, capstone_instance, d, pc):
 
 
 def exmi_parser(instruction_data, opcode_id, capstone_instance, d, pc):
-        mi_size = ord(instruction_data[1])
-        mi = instruction_data[4: 4 + mi_size]
+    mi_size = ord(instruction_data[1])
+    mi = instruction_data[4: 4 + mi_size]
 
-        dl = list(capstone_instance.disasm(mi, 0))
-        if len(dl) > 1:
-            for d in dl:
-                print "%s %s" % (str(d.mnemonic), str(d.op_str))
-            raise Exception("1")
+    dl = list(capstone_instance.disasm(mi, 0))
+    if len(dl) > 1:
+        for d in dl:
+            print "%s %s" % (str(d.mnemonic), str(d.op_str))
+        raise Exception("1")
 
-        if len(dl) == 0:
-            print hex(pc)
-            hexdump(instruction_data)
-            raise Exception("2")
-        dl = dl[0]
+    if len(dl) == 0:
+        print hex(pc)
+        hexdump(instruction_data)
+        raise Exception("2")
+    dl = dl[0]
 
-        mi_str = "%s %s" % (str(dl.mnemonic), str(dl.op_str))
-        mnem = "exmi"
-        operand1 = InsOperand(mi_str, is_machine_disassm=True)
-        operand2 = None
+    mi_str = "%s %s" % (str(dl.mnemonic), str(dl.op_str))
+    mnem = "exmi"
+    operand1 = InsOperand(mi_str, is_machine_disassm=True)
+    operand2 = None
 
-        i = Instruction32(opcode_id, instruction_data, operand1, operand2, mnem, is_machine_code_exec=True)
-        return i
+    i = Instruction32(opcode_id, instruction_data, operand1, operand2, mnem, is_machine_code_exec=True)
+    return i
 
 
 def movroimm32_parser(instruction_data, opcode_id, capstone_instance, d, pc):
@@ -292,7 +292,7 @@ def unknown_parser(instruction_data, opcode_id, capstone_instance, d, pc):
     return i
 
 
-class Instruction32(instruction.Instruction):
+class Instruction32(Instruction):
     ins_parsers = {0x1e: call_parser,
                    0x17: exmi_parser,
                    0x1c: movroimm32_parser,
@@ -321,13 +321,13 @@ class Instruction32(instruction.Instruction):
     def __init__(self, opcode_id, opcode_data, operand1, operand2, mnemonic, is_branch=False, is_call=False,
                  is_virtual_call=False, virtual_call_id=None, call_handler=None, branch_target=None,
                  is_machine_code_exec=False, is_data_transfer=False, is_bad_instruction=False):
-        instruction.Instruction.__init__(self, opcode_id, opcode_data, operand1, operand2, mnemonic,
-                                         is_branch=is_branch,
-                                         is_call=is_call, is_virtual_call=is_virtual_call,
-                                         virtual_call_id=virtual_call_id,
-                                         call_handler=call_handler, branch_target=branch_target,
-                                         is_machine_code_exec=is_machine_code_exec, is_data_transfer=is_data_transfer,
-                                         is_bad_instruction=is_bad_instruction)
+        Instruction.__init__(self, opcode_id, opcode_data, operand1, operand2, mnemonic,
+                             is_branch=is_branch,
+                             is_call=is_call, is_virtual_call=is_virtual_call,
+                             virtual_call_id=virtual_call_id,
+                             call_handler=call_handler, branch_target=branch_target,
+                             is_machine_code_exec=is_machine_code_exec, is_data_transfer=is_data_transfer,
+                             is_bad_instruction=is_bad_instruction)
 
     @staticmethod
     def from_opcode_data(instruction_data, pc, opcode_id, capstone_instance, handler_table, disassm):

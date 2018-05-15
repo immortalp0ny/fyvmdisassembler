@@ -3,7 +3,7 @@ import re
 from hexdump import hexdump
 
 
-class Instruction:
+class Instruction(object):
     conditional_branching = ["jz", "je", "jnz", "jne", "js", "jns", "jo", "jno", "jpe", "jp", "jpo", "jnp", "jb",
                              "jnae",
                              "jc", "jb", "jnae", "jc", "jnb", "jae", "jnc", "jbe", "jna", "jnbe", "ja", "jl",
